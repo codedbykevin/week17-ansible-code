@@ -1,0 +1,50 @@
+---
+- hosts: ws
+  become: true
+  ignore_errors: true
+  gather_facts: no
+  tasks:
+    - name: Update system
+      yum:
+        name: '*'
+        state: latest
+      tags:
+        - update
+    - name: Install httpd
+      yum:
+        name: httpd
+        state: latest
+      tags:
+        - install 
+    - name: start httpd daemon
+      systemd: 
+        name: httpd
+        state: started
+        enabled: yes
+      tags:
+        - daemon
+    - name: Copy index file to target
+      copy:
+        src: /home/ec2-user/ansible-dev/index.html
+        dest: /var/www/html/index.html
+        mode: "0644"
+      tags:
+        - file_copy
+      notify: 
+       - Restart Apache
+    
+  handlers: 
+    - name: Restart Apache
+      systemd:
+        state: restarted
+        name: httpd
+
+
+
+
+
+
+
+
+        
+  
